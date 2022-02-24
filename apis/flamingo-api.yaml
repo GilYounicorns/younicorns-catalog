@@ -1,0 +1,2699 @@
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: Flamingo
+  description: Flamingo app API
+  tags:
+    - flamingo
+    - rest
+    - smartrh
+  annotations:
+    # The annotation is deprecated, we use placeholders (see below) instead, remove it later.
+    backstage.io/definition-at-location: 'url:https://raw.githubusercontent.com/APIs-guru/openapi-directory/master/APIs/spotify.com/v1/swagger.yaml'
+spec:
+  type: openapi
+  lifecycle: production
+  owner: Gilles-D
+  definition: |
+    swagger: "2.0"
+    info:
+      description: "Note that for each request, you have to put KEYRUS adfs user token.\
+        \ This token will be put in bearer."
+      version: "1.0.0"
+      title: "Flamingo API"
+      termsOfService: "http://younicorns.io/terms/"
+      contact:
+        email: "gilles.dansou@younicorns.io"
+      license:
+        name: "Apache 2.0"
+        url: "https://www.younicorns.io/licenses/LICENSE-2.0.html"
+    host: "test.com"
+    basePath: "/1.0.0"
+    tags:
+    - name: "collaborator"
+      description: "All information about one or more employees"
+      externalDocs:
+        description: "On going"
+        url: "http://younicorns.io"
+    - name: "lead"
+      description: "All information about one or more leads detected."
+      externalDocs:
+        description: "On going"
+        url: "http://younicorns.io"
+    schemes:
+    - "https"
+    - "http"
+    paths:
+      /login:
+        post:
+          tags:
+          - "login"
+          summary: "Give access to collaborator"
+          operationId: "give_access"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: "Object containing user professionnal email"
+            required: true
+            schema:
+              $ref: "#/definitions/body"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/inline_response_200"
+            "400":
+              description: "Invalid token"
+            "401":
+              description: "User doesn't exist"
+            "402":
+              description: "New collab"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.login_controller"
+      /login/accesnewcollaborator:
+        post:
+          tags:
+          - "login"
+          summary: "Give access to new collaborator with magic link"
+          operationId: "give_access_new_collab"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/inline_response_200"
+            "400":
+              description: "Invalid token"
+            "401":
+              description: "User doesn't exist"
+            "402":
+              description: "New collab"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.login_controller"
+      /reconciliation:
+        post:
+          tags:
+          - "login"
+          summary: "Help new employee to retrieve his information"
+          operationId: "reconciliation"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: "Object containing user profesional and personal email"
+            required: true
+            schema:
+              $ref: "#/definitions/reconciliation_body"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/inline_response_200"
+            "400":
+              description: "Invalid token"
+            "401":
+              description: "User doesn't exist"
+            "402":
+              description: "New collab"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.login_controller"
+      /collaborator:
+        get:
+          tags:
+          - "collaborator"
+          summary: "Get information on all employees"
+          operationId: "get_collaborators"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - in: query
+            name: officeid
+            type: integer
+          - in: query
+            name: senioritymin
+            type: integer
+          - in: query
+            name: senioritymax
+            type: integer
+          - in: query
+            name: adrmin
+            type: integer
+          - in: query
+            name: adrmax
+            type: integer
+          - in: query
+            name: availability
+            type: boolean
+          - in: query
+            name: validate
+            type: boolean
+          - in: query
+            name: search
+            type: string
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                  - type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                        example: "5ddbca444e62a1ec0521a11e"
+                  - $ref: "#/definitions/collaborator"
+            "400":
+              description: "Invalid token"
+          x-swagger-router-controller: "swagger_server.controllers.collaborator_controller"
+        post:
+          tags:
+          - "collaborator"
+          summary: "Create new collaborator. This endpoint is only available for manager\
+            \ to create new collaborator."
+          operationId: "add_collaborator"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - in: "body"
+            name: "body"
+            required: true
+            schema:
+              $ref: "#/definitions/newcollaborator"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.collaborator_controller"
+      /collaborator/{collaboratorId}:
+        get:
+          tags:
+          - "collaborator"
+          summary: "Returns one or many employees information"
+          description: "Returns one or many employees information"
+          operationId: "get_collaborator"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which information needs\
+              \ to be get"
+            required: true
+            type: "array"
+            items:
+              type: "string"
+            collectionFormat: "csv"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                  - type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                        example: "5ddbca444e62a1ec0521a11e"
+                  - $ref: "#/definitions/collaborator"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.collaborator_controller"
+        put:
+          tags:
+          - "collaborator"
+          summary: "Update an employee's information. Only the information to be modified\
+            \ is mandatory."
+          operationId: "update_collaborator"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which information needs to be updated"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing the information to modify"
+            required: true
+            schema:
+              $ref: "#/definitions/updatecollaborator"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.collaborator_controller"
+        delete:
+          tags:
+          - "collaborator"
+          summary: "Remove an employee"
+          operationId: "remove_collaborator"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee who will be removed"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.collaborator_controller"
+      /collaborator/{collaboratorId}/validate:
+        put:
+          tags:
+          - "collaborator"
+          summary: "Validate employee cv."
+          operationId: "validate_collaborator_cv"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which information needs to be validated"
+            required: true
+            type: "array"
+            items:
+              type: "string"
+            collectionFormat: "csv"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.collaborator_controller"
+      /collaborator/{collaboratorId}/lead:
+        get:
+          tags:
+          - "lead"
+          summary: "Returns an collaborator leads information"
+          operationId: "get_collaborator_lead"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: query
+            name: location
+            type: string
+          - in: query
+            name: echeanceaoid
+            type: integer
+          - in: query
+            name: startdate
+            type: string
+          - in: query
+            name: clientid
+            type: integer
+          - in: query
+            name: search
+            type: string
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/inline_response_200_1"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Lead not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.lead_controller"
+        post:
+          tags:
+          - "lead"
+          summary: "Create new lead"
+          operationId: "add_lead"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing the information of lead to be added."
+            required: true
+            schema:
+              $ref: "#/definitions/newlead"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.lead_controller"
+      /collaborator/{collaboratorId}/lead/{leadId}:
+        get:
+          tags:
+          - "lead"
+          summary: "Returns one or many lead information"
+          operationId: "get_lead"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - name: "leadId"
+            in: "path"
+            description: "Lead's ID"
+            required: true
+            type: "string"
+            collectionFormat: "csv"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/definitions/lead"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Lead not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.lead_controller"
+        put:
+          tags:
+          - "lead"
+          summary: "Update an lead's information. Only the information to be modified\
+            \ is mandatory."
+          operationId: "update_lead"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - name: "leadId"
+            in: "path"
+            description: "Lead to be updated ID"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing the information to modify"
+            required: true
+            schema:
+              $ref: "#/definitions/newlead"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Lead not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.lead_controller"
+      /lead/match/{leadId}:
+        get:
+          tags:
+          - "lead"
+          summary: "Run matching for one or many lead"
+          operationId: "get_lead_match"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "leadId"
+            in: "path"
+            description: "Lead's ID"
+            required: true
+            type: "array"
+            items:
+              type: "string"
+            collectionFormat: "csv"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/leadmatch"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Lead not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.lead_controller"
+      /lead/matching/{leadId}:
+        get:
+          tags:
+          - "lead"
+          summary: "Run matching for one or many lead"
+          operationId: "get_lead_matching"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "leadId"
+            in: "path"
+            description: "Lead's ID"
+            required: true
+            type: "array"
+            items:
+              type: "string"
+            collectionFormat: "csv"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/leadmatch"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Lead not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.lead_controller"
+      /ref/skills/languages:
+        get:
+          tags:
+          - "skill reference"
+          summary: "Get all languages"
+          operationId: "get_all_languages"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters: []
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/inline_response_200_2"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.references_controller"
+      /ref/skills/competences:
+        get:
+          tags:
+          - "skill reference"
+          summary: "Get all other skills"
+          operationId: "get_all_other_skills"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters: []
+          responses:
+            "200":
+              description: "Success"
+              schema: {}
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.references_controller"
+      /collaborator/{collaboratorId}/skill:
+        get:
+          tags:
+          - "skill"
+          summary: "Returns a single employee's skills"
+          description: "Returns a single employee's skills"
+          operationId: "get_collaborator_skills"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which information needs\
+              \ to be get"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                  - $ref: "#/definitions/get_skill"
+                  - type: "object"
+                    properties:
+                      validate:
+                        type: "boolean"
+                        example: false
+                        description: "Is skill validate by manager or not"
+                      type:
+                        type: "string"
+                        example: "languages"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.skill_controller"
+        post:
+          tags:
+          - "skill"
+          summary: "Add skills to employee"
+          operationId: "add_skills"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing skills to add information. If skill is not\
+              \ in skills database, set refskillid to -1."
+            required: true
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/skill"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.skill_controller"
+        put:
+          tags:
+          - "skill"
+          summary: "Update employee skill"
+          operationId: "update_skills"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing skills to update information"
+            required: true
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/body_1"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.skill_controller"
+        delete:
+          tags:
+          - "skill"
+          summary: "Remove skills"
+          operationId: "remove_skills"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing skills to update information"
+            required: true
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/body_3"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.skill_controller"
+      /collaborator/{collaboratorId}/formation:
+        get:
+          tags:
+          - "formation"
+          summary: "Returns a single employee's formations"
+          description: "Returns a single employee's formations"
+          operationId: "get_collaborator_formations"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which information needs\
+              \ to be get"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                  - type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                        example: "5ddbca444e62a1ec0521a11e"
+                      infos:
+                        $ref: "#/definitions/formation"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.formation_controller"
+        post:
+          tags:
+          - "formation"
+          summary: "Add employee's formation"
+          operationId: "add_formation"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing formation to add information"
+            required: true
+            schema:
+              $ref: "#/definitions/formation"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.formation_controller"
+      /collaborator/{collaboratorId}/formation/{formationId}:
+        put:
+          tags:
+          - "formation"
+          summary: "Update employee formation"
+          operationId: "update_formation"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - name: "formationId"
+            in: "path"
+            description: "Formation id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing formation to update information"
+            required: true
+            schema:
+              $ref: "#/definitions/formation"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.formation_controller"
+      /collaborator/{collaboratorId}/experience:
+        get:
+          tags:
+          - "experience"
+          summary: "Returns a single employee's experience"
+          description: "Returns a single employee's experience"
+          operationId: "get_collaborator_experience"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which information needs to be get"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                  - type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                        example: "5ddbca444e62a1ec0521a11e"
+                      infos:
+                        $ref: "#/definitions/experience"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.experience_controller"
+        post:
+          tags:
+          - "experience"
+          summary: "Add employee's experience"
+          operationId: "add_experience"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing experience to add information"
+            required: true
+            schema:
+              $ref: "#/definitions/post_experience"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.experience_controller"
+      /collaborator/{collaboratorId}/experience/{experienceId}:
+        put:
+          tags:
+          - "experience"
+          summary: "Update employee experience"
+          operationId: "update_experience"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - name: "experienceId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing experience to update information"
+            required: true
+            schema:
+              $ref: "#/definitions/post_experience"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.experience_controller"
+        delete:
+          tags:
+          - "experience"
+          summary: "Delete employee experience"
+          operationId: "delete_experience"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - name: "experienceId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.experience_controller"
+      /collaborator/{collaboratorId}/certification:
+        get:
+          tags:
+          - "certification"
+          summary: "Returns a single employee's certification"
+          description: "Returns a single employee's certification"
+          operationId: "get_collaborator_certification"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which information needs to be get"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                  - type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                        example: "5ddbca444e62a1ec0521a11e"
+                      infos:
+                        $ref: "#/definitions/certification"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.certification_controller"
+        post:
+          tags:
+          - "certification"
+          summary: "Add employee's certification"
+          operationId: "add_certification"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing certification to add information"
+            required: true
+            schema:
+              $ref: "#/definitions/certification"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.certification_controller"
+      /collaborator/{collaboratorId}/certification/{certificationId}:
+        put:
+          tags:
+          - "certification"
+          summary: "Update employee certification"
+          operationId: "update_certification"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - name: "certificationId"
+            in: "path"
+            description: "Certification id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing certification to update information"
+            required: true
+            schema:
+              $ref: "#/definitions/certification"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.certification_controller"
+      /collaborator/{collaboratorId}/preference:
+        get:
+          tags:
+          - "preference"
+          summary: "Returns a single employee's preferences. This is preference type 1 - geographic, 2- sector, 3- skills"
+          description: "Returns a single employee's preferences. This is preference type 1 - geographic, 2- sector, 3- skills"
+          operationId: "get_collaborator_preference"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which information needs to be get"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                  - type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                        example: "5ddbca444e62a1ec0521a11e"
+                      infos:
+                        $ref: "#/definitions/preference"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.preference_controller"
+        post:
+          tags:
+          - "preference"
+          summary: "Add employee's preference"
+          operationId: "add_preference"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing preference to add information"
+            required: true
+            schema:
+              $ref: "#/definitions/preference"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.preference_controller"
+      /collaborator/{collaboratorId}/preference/{preferenceId}:
+        put:
+          tags:
+          - "preference"
+          summary: "Update employee preference"
+          operationId: "update_preference"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - name: "preferenceId"
+            in: "path"
+            description: "Preference id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing preference to update information"
+            required: true
+            schema:
+              $ref: "#/definitions/preference"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.preference_controller"
+      /collaborator/{collaboratorId}/mission:
+        get:
+          tags:
+          - "mission"
+          summary: "Returns a single employee's mission"
+          description: "Returns a single employee's mission"
+          operationId: "get_collaborator_mission"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which mission needs to be get"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  type: "object"
+                  allOf:
+                  - type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                        example: "5ddbca444e62a1ec0521a11e"
+                      infos:
+                        $ref: "#/definitions/mission"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.mission_controller"
+        put:
+          tags:
+          - "mission"
+          summary: "Update employee mission"
+          operationId: "update_mission"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing mission to update information"
+            required: true
+            schema:
+              type: "array"
+              items:
+                $ref: "#/definitions/mission"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.mission_controller"
+      /collaborator/{collaboratorId}/kpis:
+        get:
+          tags:
+          - "kpis"
+          summary: "Returns a single employee's kpis. This endpoint is only available\
+            \ for manager."
+          description: "Returns a single employee's kpis. This endpoint is only available\
+            \ for manager."
+          operationId: "get_collaborator_kpis"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which kpis needs to be get"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/definitions/kpis"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.kpis_controller"
+      /collaborator/{collaboratorId}/notifications:
+        get:
+          tags:
+          - "notifications"
+          summary: "Returns a single employee's notifications"
+          description: "Returns a single employee's notifications"
+          operationId: "get_collaborator_notifications"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which information needs to be get"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/definitions/notification"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.notifications_controller"
+      /collaborator/{collaboratorId}/notifications/{notificationId}:
+        put:
+          tags:
+          - "notifications"
+          summary: "Update notifications read status"
+          description: "Update notifications read status"
+          operationId: "update_collaborator_notifications"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which information needs to be updated"
+            required: true
+            type: "string"
+          - name: "notificationId"
+            in: "path"
+            description: "Identifier of notification"
+            required: true
+            type: "array"
+            items:
+              type: "string"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.notifications_controller"
+      /ref/other:
+        get:
+          tags:
+          - "reference"
+          summary: "Return reference. Available refrences are needorigin statutlead usertype\
+            \ country society preferencetypes codeduration businessunit office adr sector seniority."
+          operationId: "get_reference"
+          produces:
+          - "application/json"
+          - "application/xml"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/inline_response_200_3"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Collaborator not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.reference_controller"
+      /collaborator/{collaboratorId}/error:
+        post:
+          tags:
+          - "error"
+          summary: "Submit error"
+          operationId: "submit_error"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Identifier of employee which kpis needs to be get"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing error details"
+            required: true
+            schema:
+              $ref: "#/definitions/error"
+          responses:
+            200:
+              description: "Success"
+            400:
+              description: "Invalid token"
+            405:
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.error_controller"
+      /collaborator/{collaboratorId}/cv:
+        get:
+          tags:
+          - "cv"
+          summary: "Returns an collaborator downloadable cv link"
+          operationId: "get_collaborator_cv"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/inline_response_200_5"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Lead not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.collaborator_controller"
+        post:
+          tags:
+          - "cv"
+          summary: "Returns an collaborator downloadable cv link"
+          operationId: "post_collaborator_cv"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "collaboratorId"
+            in: "path"
+            description: "Employee's id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            required: true
+            schema:
+              $ref: "#/definitions/collaboratorcv"
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/inline_response_200_5"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.collaborator_controller"
+      /collaborator/{workplaceId}/chatbotlead:
+        post:
+          tags:
+          - "lead"
+          summary: "Create new lead from chatbot"
+          operationId: "add_lead_chatbot"
+          consumes:
+          - "application/json"
+          - "application/xml"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - name: "workplaceId"
+            in: "path"
+            description: "Employee's workplace id"
+            required: true
+            type: "string"
+          - in: "body"
+            name: "body"
+            description: "Object containing the information of lead to be added."
+            required: true
+            schema:
+              $ref: "#/definitions/newlead"
+          responses:
+            "200":
+              description: "Success"
+            "400":
+              description: "Invalid token"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.lead_controller"
+      /img:
+        get:
+          tags:
+          - "collaborator"
+          summary: "Get employe picture"
+          operationId: "get_any_img"
+          produces:
+          - "application/json"
+          - "application/xml"
+          parameters:
+          - in: query
+            name: name
+            type: string
+          - in: query
+            name: token
+            type: string
+          responses:
+            "200":
+              description: "Success"
+              schema:
+                $ref: "#/definitions/inline_response_200_5"
+            "400":
+              description: "Invalid token"
+            "404":
+              description: "Image not found"
+            "405":
+              description: "Invalid entry"
+          x-swagger-router-controller: "swagger_server.controllers.collaborator_controller"
+    definitions:
+      address:
+        type: "object"
+        properties:
+          street_number:
+            type: "string"
+            example: "156"
+            description: "Street number"
+          street_name:
+            type: "string"
+            example: "Rue Danton"
+            description: "Street name"
+          zip_code:
+            type: "string"
+            example: "92300"
+            description: "ZIP code"
+          city:
+            type: "string"
+            example: "Levallois-Perret"
+            description: "City name"
+          country:
+            type: "string"
+            example: "France"
+            description: "Country name"
+        description: "Employee home address"
+      formation:
+        type: "object"
+        properties:
+          organization:
+            type: "string"
+            example: "Université paris descartes"
+            description: "Formation's organization"
+          title:
+            type: "string"
+            example: "Master sciences des données"
+            description: "Formation title"
+          end:
+            type: "string"
+            example: "2014-06-01"
+            description: "Formation end date"
+        xml:
+          name: "formation"
+      experience:
+        type: "object"
+        properties:
+          society:
+            type: "string"
+            example: "Crédit Agricole S.A"
+            description: "Society name"
+          logo:
+            type: string
+          title:
+            type: "string"
+            example: "ITG SIT - Animation big data"
+            description: "Mission title"
+          job_title:
+            type: "string"
+            example: "Chef de projet big data"
+            description: "Job title"
+          description:
+            type: "string"
+            example: "En tant que Tech Lead, ma mission s'est déclinée de la façon suivante\
+              \ : . Garantir la qualité de la conception technique, de sa réalisation\
+              \ et de sa documentation, . Garantir la qualité des développements et des\
+              \ livraisons sur tous les environnements, . Mettre en place tous les processus\
+              \ d’industrialisation et d’automatisation, . Assurer un rôle de référent\
+              \ technique auprès de votre squad (coaching technique), . Mettre en place\
+              \ des bonnes pratiques de développement et s’assurer qu’elles sont bien\
+              \ mises en oeuvre, . Accompagner la montée en compétences de votre squad,\
+              \ . Participer à la communauté des tech leads pour s’assurer d’une bonne\
+              \ capitalisation entre squads et de l’harmonisation des pratiques de dé\
+              veloppement, . Réaliser de la veille technologique."
+            description: "Job description"
+          environnement:
+            type: "array"
+            description: "Technical environnement"
+            items:
+              type: "object"
+              properties:
+                id:
+                  type: "string"
+                  example: "5ddec9e17a5392d0583f332f"
+                label:
+                  type: "string"
+                  example: "vba"
+          start:
+            type: "string"
+            example: "2015-01-01"
+            description: "Mission start date"
+          end:
+            type: "string"
+            example: "2017-06-01"
+            description: "Mission end date"
+          realized: 
+            type: "array"
+            items:
+              type: "string"
+              example: "Realization 1"
+        xml:
+          name: "experiences"
+      skill:
+        type: "object"
+        properties:
+          refskillid:
+            type: "string"
+            example: "5ddbca444e62a1ec0521a121"
+            description: "Ref skill id"
+          title:
+            type: "string"
+            example: "Data management"
+            description: "Skill title"
+          level:
+            type: "integer"
+            example: 4
+            description: "Skill level"
+      get_skill:
+        type: "object"
+        properties:
+          refskillid:
+            type: "string"
+            example: "5ddbca444e62a1ec0521a121"
+            description: "Ref skill id"
+          title:
+            type: "string"
+            example: "Data management"
+            description: "Skill title"
+          level:
+            type: "integer"
+            example: 4
+            description: "Skill level"
+          domain:
+            type: "string"
+            example: "conseil"
+          sub_domain:
+            type: "string"
+            example: "data"
+      preference:
+        type: "object"
+        properties:
+          type:
+            type: "integer"
+            example: 1
+            description: "Preference type (1- geographic, 2- sector, 3- skills)"
+          preferences:
+            type: "array"
+            description: "Preference values"
+            items:
+              type: "string"
+              example: ""
+      certification:
+        type: "object"
+        properties:
+          title:
+            type: "string"
+            example: "Certified SAS Base"
+            description: "Certification title"
+          year:
+            type: "number"
+            format: "integer"
+            example: 2014
+            description: "Year of certification"
+      lead:
+        xml:
+          name: "lead"
+        allOf:
+        - type: "object"
+          properties:
+            type:
+              type: "string"
+              example: "ao"
+              description: "Lead type"
+            logo:
+              type: "string"
+              example: "/cloud/flamingo/creditagricole.jpg"
+              description: "Society logo"
+            reference:
+              type: "string"
+              example: "BPM004091"
+              description: "Lead reference"
+            society:
+              type: "object"
+              properties:
+                label:
+                  type: "string"
+                  example: "Crédit Agricole"
+                  description: "Society name"
+                id:
+                  type: "integer"
+                  example: 1
+            entity:
+              type: "string"
+              example: "assurances"
+            title:
+              type: "string"
+              example: "ITG SIT - Animation big data"
+              description: "Mission title"
+            profile:
+              type: "string"
+              example: "Chef de projet big data"
+              description: "Profile searched"
+            seniority:
+              type: "number"
+              example: 5
+              description: "Seniority searched"
+            mission_date:
+              type: "object"
+              properties:
+                start:
+                  type: "string"
+                  example: "2019-07-03"
+                  description: "Mission start date"
+                end:
+                  type: "string"
+                  example: "2019-10-03"
+                  description: "Mission end date"
+            description:
+              type: "string"
+              example: "En tant que Tech Lead, vos missions se déclinent de la façon suivante\
+                \ : . Garantir la qualité de la conception technique, de sa réalisation\
+                \ et de sa documentation, . Garantir la qualité des développements et\
+                \ des livraisons sur tous les environnements, . Mettre en place tous les\
+                \ processus d’industrialisation et d’automatisation, . Assurer un rôle\
+                \ de référent technique auprès de votre squad (coaching technique), .\
+                \ Mettre en place des bonnes pratiques de développement et s’assurer qu’\
+                elles sont bien mises en oeuvre, . Accompagner la montée en compétences\
+                \ de votre squad, . Participer à la communauté des tech leads pour s’\
+                assurer d’une bonne capitalisation entre squads et de l’harmonisation\
+                \ des pratiques de développement, . Réaliser de la veille technologique."
+              description: "Mission description"
+            context:
+              type: "string"
+              example: "Crédit Agricole Assurances se prépare pour demain. Dans un contexte\
+                \ de transformation digitale, marqué par les nouvelles technologies et\
+                \ les nouvelles méthodes de travail agiles, le Crédit Agricole Assurances\
+                \ a lancé la construction d’une plateforme data multimétier,muti-usage.\
+                \ Nous cherchons des profils curieux, ouverts à l’innovation, motivés\
+                \ par le changement et engagés dans la transformation. Rejoignez notre\
+                \ plateforme Data et travaillez dans un environnement dynamique, stimulant\
+                \ dans un groupe à très forte croissance. Au sein du pôle IT du Crédit\
+                \ Agricole Assurance, rattaché au responsable de la Plateforme Data, vous\
+                \ êtes le responsable et référent technique de l'une des squads de dé\
+                veloppement (dans un éco-système data/big data)."
+              description: "Mission context"
+            address:
+              type: "object"
+              description: "Society address"
+              properties:
+                street_number:
+                  type: "string"
+                  example: "18"
+                street_name:
+                  type: "string"
+                  example: "Boulevard de Vaugirard"
+                zip_code:
+                  type: "string"
+                  example: "75015"
+                city:
+                  type: "string"
+                  example: "Paris"
+                country:
+                  type: "string"
+                  example: "France"
+                lat:
+                  type: "number"
+                long:
+                  type: "number"
+            day_left:
+              type: "number"
+              example: 18
+              description: "Day left before lead end"
+            skills:
+              type: "array"
+              description: "Skills searched"
+              items:
+                type: "object"
+                properties:
+                  refskillid:
+                    type: "string"
+                    example: "5ddd65c5d652d23a9dedda15"
+                  refskilltitle:
+                    type: "string"
+                    example: "python"
+                  level:
+                    type: "integer"
+                    example: 4
+            statusid:
+              type: "number"
+              format: "integer"
+              description: "Lead status : 1- en attente, 2- traité, 3- non traité, 4- expiré"
+              example: 1
+            comment:
+              type: "string"
+            source:
+              type: "string"
+              example: "5ddbca454e62a1ec0521a124"
+              description: "Id of lead source. Source can be client platform. In this\
+                \ case set client id. If source is sales or employee, set collaborator\
+                \ id."
+            resource:
+              type: "string"
+              example: "5ddbca454e62a1ec0521a124"
+              description: "Id of lead resource. resource is employee who is staffe on this mission"
+            additionnal_info:
+              type: "string"
+            read:
+              type: "boolean"
+              example: false
+            contact:
+                type: "object"
+                properties:
+                  surname:
+                    type: "string"
+                    example: "doe"
+                  firstname:
+                    type: "string"
+                    example: "john"
+                  email:
+                    type: "string"
+                    example: "john.doe@bnp.fr"
+                  phone:
+                    type: "string"
+                    example: "+33123456789"
+        - $ref: "#/definitions/leadmatch"
+      leadmatch:
+        type: "object"
+        properties:
+          match:
+            type: "array"
+            description: "List of consultant match with lead"
+            items:
+              $ref: "#/definitions/leadmatch_match"
+        xml:
+          name: "lead"
+        example:
+          match:
+          - score: 0.8000000000000000444089209850062616169452667236328125
+            preference:
+            - satisfied: true
+              type: 1
+            - satisfied: true
+              type: 1
+            id: "5d70d898964169c042d2465c"
+          - score: 0.8000000000000000444089209850062616169452667236328125
+            preference:
+            - satisfied: true
+              type: 1
+            - satisfied: true
+              type: 1
+            id: "5d70d898964169c042d2465c"
+      phone:
+        type: "object"
+        properties:
+          type:
+            type: "string"
+            example: "domicile"
+            description: "Phone number type"
+          country_code:
+            type: "string"
+            example: "+33"
+            description: "Phone country code"
+          value:
+            type: "string"
+            example: "0634983401"
+            description: "Phone number"
+      mission:
+        type: "object"
+        properties:
+          society:
+            type: "string"
+            example: "Crédit Agricole S.A"
+            description: "Society name"
+          title:
+            type: "string"
+            example: "ITG SIT - Animation big data"
+            description: "Mission title"
+          job_title:
+            type: "string"
+            example: "Chef de projet big data"
+            description: "Job title"
+          description:
+            type: "string"
+            example: "En tant que Tech Lead, ma mission s'est déclinée de la façon suivante\
+              \ : . Garantir la qualité de la conception technique, de sa réalisation\
+              \ et de sa documentation, . Garantir la qualité des développements et des\
+              \ livraisons sur tous les environnements, . Mettre en place tous les processus\
+              \ d’industrialisation et d’automatisation, . Assurer un rôle de référent\
+              \ technique auprès de votre squad (coaching technique), . Mettre en place\
+              \ des bonnes pratiques de développement et s’assurer qu’elles sont bien\
+              \ mises en oeuvre, . Accompagner la montée en compétences de votre squad,\
+              \ . Participer à la communauté des tech leads pour s’assurer d’une bonne\
+              \ capitalisation entre squads et de l’harmonisation des pratiques de dé\
+              veloppement, . Réaliser de la veille technologique."
+            description: "Job description"
+          environnement:
+            type: "array"
+            description: "Technical environnement"
+            items:
+              $ref: "#/definitions/mission_environnement"
+          start:
+            type: "string"
+            example: "2015-01-01"
+            description: "Mission start date"
+          end:
+            type: "string"
+            example: "2017-06-01"
+            description: "Mission end date"
+          comment:
+            type: "string"
+          endmission:
+            type: "boolean"
+            description: "For ending mission"
+            example: true
+        xml:
+          name: "experiences"
+      newcollaborator:
+        type: "object"
+        required:
+        - "master"
+        properties:
+          master:
+            $ref: "#/definitions/newcollaborator_master"
+          technical:
+            $ref: "#/definitions/newcollaborator_technical"
+          address:
+            $ref: "#/definitions/address"
+          phone:
+            $ref: "#/definitions/phone"
+      collaborator:
+        type: "object"
+        properties:
+          master:
+            $ref: "#/definitions/collaborator_master"
+          technical:
+            $ref: "#/definitions/newcollaborator_technical"
+      updatecollaborator:
+        type: "object"
+        properties:
+          master:
+            $ref: "#/definitions/updatecollaborator_master"
+          technical:
+            $ref: "#/definitions/newcollaborator_technical"
+          address:
+            $ref: "#/definitions/address"
+          phone:
+            $ref: "#/definitions/phone"
+      kpis:
+        type: "object"
+        properties:
+          1:
+            $ref: "#/definitions/kpis_todo"
+          2:
+            $ref: "#/definitions/kpis_on_going"
+          3:
+            $ref: "#/definitions/kpis_done"
+        example:
+          1:
+            last_value: 0
+            percentage: 0
+            value: 0
+          2:
+            last_value: 0
+            percentage: 0
+            value: 0
+          3:
+            last_value: 0
+            percentage: 0
+            value: 0
+      notification:
+        type: "object"
+        properties:
+          type:
+            type: "string"
+            example: "fiche_mission"
+          title:
+            type: "string"
+            example: "Fiche mission - Crédit Agricole"
+          message:
+            type: "string"
+            example: "Ta fiche mission est à présent dispobible."
+          url:
+            type: "string"
+            example: "https//flamingo.fr/fiche_mission/1234567889"
+          read:
+            type: "boolean"
+            example: false
+        example:
+          type: "fiche_mission"
+          title: "Fiche mission - Crédit Agricole"
+          message: "Ta fiche mission est à présent dispobible."
+          url: "https//flamingo.fr/fiche_mission/1234567889"
+          read: false
+      newlead:
+        type: "object"
+        properties:
+          societyid:
+            type: "integer"
+            example: 1
+            description: "Society id"
+          entity:
+            type: "string"
+            example: "cardiff"
+          title:
+            type: "string"
+            example: "ITG SIT - Animation big data"
+            description: "Mission title"
+          profile:
+            type: "string"
+            example: "Chef de projet big data"
+            description: "Profile searched"
+          seniorityid:
+            type: "integer"
+            example: 2
+            description: "Seniority searched id"
+          missiondate:
+            $ref: "#/definitions/newlead_date"
+          description:
+            type: "string"
+            example: "En tant que Tech Lead, vos missions se déclinent de la façon suivante\
+              \ : . Garantir la qualité de la conception technique, de sa réalisation\
+              \ et de sa documentation, . Garantir la qualité des développements et des\
+              \ livraisons sur tous les environnements, . Mettre en place tous les processus\
+              \ d’industrialisation et d’automatisation, . Assurer un rôle de référent\
+              \ technique auprès de votre squad (coaching technique), . Mettre en place\
+              \ des bonnes pratiques de développement et s’assurer qu’elles sont bien\
+              \ mises en oeuvre, . Accompagner la montée en compétences de votre squad,\
+              \ . Participer à la communauté des tech leads pour s’assurer d’une bonne\
+              \ capitalisation entre squads et de l’harmonisation des pratiques de dé\
+              veloppement, . Réaliser de la veille technologique."
+            description: "Mission description"
+          context:
+            type: "string"
+            example: "Crédit Agricole Assurances se prépare pour demain. Dans un contexte\
+              \ de transformation digitale, marqué par les nouvelles technologies et les\
+              \ nouvelles méthodes de travail agiles, le Crédit Agricole Assurances a\
+              \ lancé la construction d’une plateforme data multimétier,muti-usage. Nous\
+              \ cherchons des profils curieux, ouverts à l’innovation, motivés par le\
+              \ changement et engagés dans la transformation. Rejoignez notre plateforme\
+              \ Data et travaillez dans un environnement dynamique, stimulant dans un\
+              \ groupe à très forte croissance. Au sein du pôle IT du Crédit Agricole\
+              \ Assurance, rattaché au responsable de la Plateforme Data, vous êtes le\
+              \ responsable et référent technique de l'une des squads de développement\
+              \ (dans un éco-système data/big data)."
+            description: "Mission context. Set needorigin code. (remplacement,\
+              \ nouveau projet, renfort, autre)"
+          address:
+            $ref: "#/definitions/newlead_address"
+          leadstartdate:
+            type: "string"
+            example: "2020-01-01"
+            description: "Lead creation date"
+          leadenddate:
+            type: "string"
+            example: "2020-02-01"
+            description: "Lead end date"
+          skills:
+            type: "array"
+            description: "Skills searched"
+            items:
+              $ref: "#/definitions/newlead_skills"
+          comment:
+            type: "string"
+          additionnal_info:
+            type: "string"
+          resource:
+              type: "string"
+              example: "5ddbca454e62a1ec0521a124"
+              description: "Id of lead resource. resource is employee who is staffe on this mission"
+          read:
+            type: "boolean"
+            example: false
+          contact:
+              type: "object"
+              properties:
+                surname:
+                  type: "string"
+                  example: "doe"
+                firstname:
+                  type: "string"
+                  example: "john"
+                email:
+                  type: "string"
+                  example: "john.doe@bnp.fr"
+                phone:
+                  type: "string"
+                  example: "+33123456789"
+          status:
+            type: "number"
+            format: "integer"
+            description: "Lead status : 1- en attente, 2- traité, 3- non traité, 4- expiré"
+            example: 1
+      body:
+        type: "object"
+        properties:
+          email:
+            type: "string"
+            example: "flamingo.test@keyrus.com"
+      reconciliation_body:
+        type: "object"
+        properties:
+          profesional_email:
+            type: "string"
+            example: "flamingo.test@keyrus.com"
+          personal_email:
+            type: "string"
+            example: "flamingo.test@gmail.com"
+      inline_response_200:
+        type: "object"
+        properties:
+          id:
+            type: "string"
+            example: "5dd93830beb21b1dc85225aa"
+          type:
+            type: "string"
+            example: "sales"
+        example:
+          id: "5dd93830beb21b1dc85225aa"
+          type: "sales"
+      inline_response_200_1:
+        type: "object"
+        properties:
+          id:
+            type: "string"
+            example: "5ddbca444e62a1ec0521a11e"
+          infos:
+            $ref: "#/definitions/lead"
+        example:
+          id: "5ddbca444e62a1ec0521a11e"
+          infos: ""
+      inline_response_200_2:
+        type: "object"
+        properties:
+          domain:
+            type: "string"
+            example: "language"
+          subdomain:
+            type: "string"
+            example: "language"
+          id:
+            type: "string"
+            example: "5ddbca454e62a1ec0521a124"
+            description: "Skill id"
+          skill:
+            type: "string"
+            example: "anglais"
+        example:
+          domain: "language"
+          skill: "anglais"
+          subdomain: "language"
+          id: "5ddbca454e62a1ec0521a124"
+      body_1:
+        type: "object"
+        properties:
+          refSkillId:
+            type: "string"
+            example: "5ddec9e17a5392d0583f332f"
+          level:
+            type: "integer"
+            example: 4
+            description: "Skill level"
+      inline_response_200_3:
+        type: "object"
+        properties:
+          code:
+            type: "string"
+            example: "1"
+          label:
+            type: "string"
+            example: "paris"
+        example:
+          code: "1"
+          label: "paris"
+      body_2:
+        type: "object"
+        properties:
+          type:
+            type: "integer"
+            example: 1
+            description: "Type of search you need to do. ( 1- employee 2- lead)"
+          text:
+            type: "string"
+      leadmatch_preference:
+        type: "object"
+        properties:
+          type:
+            type: "integer"
+            example: 1
+          satisfied:
+            type: "boolean"
+            example: true
+        example:
+          satisfied: true
+          type: 1
+      leadmatch_match:
+        type: "object"
+        properties:
+          id:
+            type: "string"
+            example: "5d70d898964169c042d2465c"
+          score:
+            type: "number"
+            example: 0.8000000000000000444089209850062616169452667236328125
+          preferences:
+            type: "array"
+            items:
+              $ref: "#/definitions/leadmatch_preference"
+        example:
+          score: 0.8000000000000000444089209850062616169452667236328125
+          preference:
+          - satisfied: true
+            type: 1
+          - satisfied: true
+            type: 1
+          id: "5d70d898964169c042d2465c"
+      mission_environnement:
+        type: "object"
+        properties:
+          refskillid:
+            type: "string"
+            example: "5ddbca454e62a1ec0521a124"
+          level:
+            type: "integer"
+            example: 3
+      newcollaborator_master:
+        type: "object"
+        required:
+        - "firstname"
+        - "surname"
+        properties:
+          email:
+            type: "string"
+            example: "aamri.boris@keyrus.com"
+            description: "Employee contact email"
+          surname:
+            type: "string"
+            example: "AAMRI"
+            description: "Employee surname"
+          firstname:
+            type: "string"
+            example: "Boris"
+            description: "Employee firstname"
+          seniority:
+            type: "number"
+            format: "float64"
+            example: 5.5
+            description: "Number of years since main graduation"
+          availabilityrate:
+            type: "number"
+            format: "float64"
+            example: 0.3
+          accept_guc:
+            type: "boolean"
+            description: "Is the employee accept guc or not"
+          typeid:
+            type: integer
+            example: 5
+          comment:
+            type: "string"
+            example: "Come soon"
+          availability:
+            type: "string"
+            example: "2019-11-04"
+            description: "Employee availability data"
+      newcollaborator_technical:
+        type: "object"
+        properties:
+          onboard:
+            type: "boolean"
+            example: false
+            description: "Is the employee onboarded or not"
+          break_point:
+            type: "number"
+            format: "integer"
+            example: 2
+            description: "Employee stop at this point during the onboarding"
+      collaborator_master:
+        type: "object"
+        properties:
+          id_wp:
+            type: "string"
+            example: "0700237"
+            description: "ID in workplace"
+          surname:
+            type: "string"
+            example: "AAMRI"
+            description: "Employee surname"
+          firstname:
+            type: "string"
+            example: "Boris"
+            description: "Employee firstname"
+          seniority:
+            type: "number"
+            format: "float64"
+            example: 5.5
+            description: "Number of years since main graduation"
+          title:
+            type: "string"
+            example: "Data analyst"
+            description: "Employee profession"
+          business_unit:
+            type: "string"
+            example: "PS"
+            description: "Employee business unit"
+          sector:
+            type: "string"
+            example: "Banque"
+            description: "Employee sector (like bank, insurance, etc)"
+          client:
+            type: "string"
+            example: "Bnp"
+            description: "sales account"
+          adr:
+            type: "number"
+            example: 1200
+            description: "Employee average daily rate ( in french TJM)"
+          office:
+            type: "string"
+            example: "Paris"
+            description: "Employee office's city"
+          country:
+            type: "string"
+            example: "France"
+            description: "Employee office's country"
+          email:
+            type: "string"
+            example: "aamri.boris@keyrus.fr"
+            description: "Employee contact email"
+          picture:
+            type: "string"
+            example: "/cloud/keyrus/r_ksa_0700237.jpg"
+            description: "Employee picture's url"
+          manager:
+            type: "object"
+            properties:
+              surname:
+                type: "string"
+                example: "AAMRI"
+                description: "Manager surname"
+              firstname:
+                type: "string"
+                example: "Boris"
+                description: "Manager firstname"
+              email:
+                type: "string"
+                example: "alain.kessouss@keyrus.fr"
+                description: "Manager contact email"
+          type:
+            type: "string"
+            example: "sales"
+            description: "Is sales, collaborator, manager"
+          availability:
+            type: "string"
+            example: "2019-11-04"
+            description: "Employee availability data"
+          active:
+            type: "boolean"
+            example: true
+            description: "Is the employee active or not"
+          accept_guc:
+            type: "boolean"
+            example: true
+            description: "Is the employee accept guc or not"
+          validate:
+            type: "boolean"
+            example: true
+            description: "Is the employee cv is validate or not"
+          availabilityrate:
+            type: "number"
+            format: "float64"
+            example: 0.3
+          comment:
+            type: "string"
+            example: "Come soon"
+      updatecollaborator_master:
+        type: "object"
+        properties:
+          email:
+            type: "string"
+            example: "aamri.boris@keyrus.com"
+            description: "Employee contact email"
+          seniority:
+            type: "number"
+            format: "float64"
+            example: 5.5
+            description: "Number of years since main graduation"
+          surname:
+            type: "string"
+            example: "AAMRI"
+            description: "Employee surname"
+          firstname:
+            type: "string"
+            example: "Boris"
+            description: "Employee firstname"
+          title:
+            type: "string"
+            example: "Data analyst"
+            description: "Employee profession"
+          accept_guc:
+            type: "boolean"
+            description: "Is the employee accept guc or not"
+          availabilityrate:
+            type: "number"
+            format: "float64"
+            example: 0.3
+          comment:
+            type: "string"
+            example: "Come soon"
+          availability:
+            type: "string"
+            example: "2019-11-04"
+            description: "Employee availability data"
+      kpis_todo:
+        type: "object"
+        properties:
+          value:
+            type: "number"
+            format: "integer"
+            example: 0
+          last_value:
+            type: "number"
+            format: "integer"
+            example: 0
+          percentage:
+            type: "number"
+            example: 0
+        description: "Number of lead to process"
+        example:
+          last_value: 0
+          percentage: 0
+          value: 0
+      kpis_on_going:
+        type: "object"
+        properties:
+          value:
+            type: "number"
+            format: "integer"
+            example: 0
+          last_value:
+            type: "number"
+            format: "integer"
+            example: 0
+          percentage:
+            type: "number"
+            example: 0
+        description: "Number of lead on going"
+        example:
+          last_value: 0
+          percentage: 0
+          value: 0
+      kpis_done:
+        type: "object"
+        properties:
+          value:
+            type: "number"
+            format: "integer"
+            example: 0
+          last_value:
+            type: "number"
+            format: "integer"
+            example: 0
+          percentage:
+            type: "number"
+            example: 0
+        description: "Number of lead processed"
+        example:
+          last_value: 0
+          percentage: 0
+          value: 0
+      newlead_date:
+        type: "object"
+        properties:
+          start:
+            type: "string"
+            example: "2019-07-03"
+            description: "Mission start date"
+          end:
+            type: "string"
+            example: "2019-10-03"
+            description: "Mission end date"
+      newlead_address:
+        type: "object"
+        properties:
+          street_number:
+            type: "string"
+            example: "18"
+          street_name:
+            type: "string"
+            example: "Boulevard de Vaugirard"
+          zip_code:
+            type: "string"
+            example: "75015"
+          city:
+            type: "string"
+            example: "Paris"
+          country:
+            type: "string"
+            example: "France"
+          lat:
+            type: "number"
+            example: 12.0
+          long:
+            type: "number"
+            example: 3.9
+        description: "Society address"
+      newlead_skills:
+        type: "object"
+        properties:
+          refskillid:
+            type: "string"
+            example: "5ddbca444e62a1ec0521a11e"
+          level:
+            type: "integer"
+            example: 4
+      body_3:
+        type: "object"
+        properties:
+          refSkillId:
+            type: "string"
+            example: "5ddec9e17a5392d0583f332f"
+      post_experience:
+        type: "object"
+        properties:
+          society:
+            type: "string"
+            example: "Crédit Agricole S.A"
+            description: "Society name"
+          title:
+            type: "string"
+            example: "ITG SIT - Animation big data"
+            description: "Mission title"
+          job_title:
+            type: "string"
+            example: "Chef de projet big data"
+            description: "Job title"
+          description:
+            type: "string"
+            example: "En tant que Tech Lead, ma mission s'est déclinée de la façon suivante\
+              \ : . Garantir la qualité de la conception technique, de sa réalisation\
+              \ et de sa documentation, . Garantir la qualité des développements et des\
+              \ livraisons sur tous les environnements, . Mettre en place tous les processus\
+              \ d’industrialisation et d’automatisation, . Assurer un rôle de référent\
+              \ technique auprès de votre squad (coaching technique), . Mettre en place\
+              \ des bonnes pratiques de développement et s’assurer qu’elles sont bien\
+              \ mises en oeuvre, . Accompagner la montée en compétences de votre squad,\
+              \ . Participer à la communauté des tech leads pour s’assurer d’une bonne\
+              \ capitalisation entre squads et de l’harmonisation des pratiques de dé\
+              veloppement, . Réaliser de la veille technologique."
+            description: "Job description"
+          environnementid:
+            type: "array"
+            example:
+            - "5ddd65c5d652d23a9dedda15"
+            - "5ddd65c5d652d23a9dedda16"
+            - "5ddd65c5d652d23a9dedda17"
+            description: "List of refskillid"
+            items:
+              type: "string"
+          start:
+            type: "string"
+            example: "2015-01-01"
+            description: "Mission start date"
+          end:
+            type: "string"
+            example: "2017-06-01"
+            description: "Mission end date"
+          realized: 
+            type: "array"
+            items:
+              type: "string"
+              example: "Realization 1"
+        xml:
+          name: "experiences"
+      error:
+        type: "object"
+        properties:
+          type:
+            type: "string"
+            example: "name error"
+          message:
+            type: "string"
+            example: "Mon nom est mal orthographié"
+          date:
+            type: "string"
+            example: "2019-11-07"
+        example:
+          date: "2019-11-07"
+          type: "name error"
+          message: "Mon nom est mal orthographié"
+      inline_response_200_4:
+        type: "object"
+        properties:
+          code:
+            type: "string"
+            example: "1"
+          society:
+            type: "string"
+            example: "bnp"
+          reftype:
+            type: "string"
+            example: "niveau 1"
+          senioritymin:
+            type: "integer"
+            example: 0
+          senioritymax:
+            type: "integer"
+            example: 2
+        example:
+          code: "1"
+          label: "paris"
+      inline_response_200_5:
+        type: "object"
+        properties:
+          link:
+            type: "string"
+            example: "https://flamingo-api.site/5dd93830beb21b1dc85225aa.pdf"
+        example:
+          link: "https://flamingo-api.site/5dd93830beb21b1dc85225aa.pdf"
+      collaboratorcv:
+        type: "object"
+        properties:
+          master:
+            $ref: "#/definitions/collaborator_master"
+          formation:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                infos:
+                  $ref: "#/definitions/formation"
+          certification:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                infos:
+                  $ref: "#/definitions/certification"
+          experience:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                infos:
+                  $ref: "#/definitions/experience"
+          skills:
+            type: "array"
+            items:
+              type: "object"
+              properties:
+                refskillid:
+                  type: "string"
+                  example: "5ddbca444e62a1ec0521a121"
+                  description: "Ref skill id"
+                title:
+                  type: "string"
+                  example: "Data management"
+                  description: "Skill title"
+                level:
+                  type: "integer"
+                  example: 4
+                  description: "Skill level"
+                type:
+                  type: "string"
+                  example: "competences"
+          mission:
+            $ref: "#/definitions/mission"
+
+    externalDocs:
+      description: "Additional documentation"
+      url: "http://younicorns.io"
+

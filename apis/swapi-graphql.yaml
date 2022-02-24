@@ -1,7 +1,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
-  name: Stawars movies
+  name: Stawars-movies
   description: Stawars movies GraphQL Schema
   links:
     - url: https://github.com/graphql/swapi-graphql

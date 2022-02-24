@@ -1,8 +1,8 @@
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
-  name: starwars-graphql
-  description: SWAPI GraphQL Schema
+  name: Stawars movies
+  description: Stawars movies GraphQL Schema
   links:
     - url: https://github.com/graphql/swapi-graphql
       title: GitHub Repo
@@ -10,7 +10,7 @@ metadata:
 spec:
   type: graphql
   lifecycle: production
-  owner: team-b
+  owner: Gilles-D
   definition: |
     schema {
       query: Root

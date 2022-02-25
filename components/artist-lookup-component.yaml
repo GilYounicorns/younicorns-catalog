@@ -1,11 +1,12 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: artist-lookup
-  description: Artist Lookup
+  name: keyrus-rh
+  description: Keyrus Smart RH
   tags:
-    - java
+    - ai
     - data
+    - python
   links:
     - url: https://example.com/user
       title: Examples Users
@@ -31,6 +32,6 @@ metadata:
 spec:
   type: service
   lifecycle: experimental
-  owner: team-a
+  owner: gilles-d
   system: artist-engagement-portal
-  dependsOn: ['resource:artists-db']
+  dependsOn: ['resource:artists-db','api:flamingo']
